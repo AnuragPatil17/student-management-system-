@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}View Attendance Logs{% endblock %}
+{% block header_title %}Attendance History Logs{% endblock %}
+
+{% block content %}
+<div class="custom-card">
+  <div class="custom-card-header flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+      <h2 class="custom-card-title">
+        <i class="bi bi-card-checklist text-primary"></i> Faculty Attendance Log Records
+      </h2>
+      <span class="badge bg-light text-secondary border">{{ records|length }} Records</span>
+    </div>
+    <a href="{{ url_for('faculty.mark_attendance') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+      <i class="bi bi-pencil-square me-1"></i> Mark / Edit Session
+    </a>
+  </div>
+
+  <div class="custom-card-body">
+    <!-- Filter Row -->
+    <form method="GET" action="{{ url_for('faculty.view_attendance') }}" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+      <div class="col-md-3">
+        <label class="form-label small fw-bold">Date</label>
+        <input type="date" name="date" class="form-control form-control-sm" value="{{ filters.date }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-bold">Subject</label>
+        <select name="subject_id" class="form-select form-select-sm">
+          <option value="">All Assigned Subjects</option>
+          {% for subj in assigned_subjects %}
+            <option value="{{ subj.id }}" {% if filters.subject_id == subj.id|string %}selected{% endif %}>{{ subj.code }} - {{ subj.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold">Class</label>
+        <select name="class_id" class="form-select form-select-sm">
+          <option value="">All Classes</option>
+          {% for cl in classes %}
+            <option value="{{ cl.id }}" {% if filters.class_id == cl.id|string %}selected{% endif %}>{{ cl.display_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-sm btn-primary w-100">
+          <i class="bi bi-funnel me-1"></i> Filter
+        </button>
+        <a href="{{ url_for('faculty.view_attendance') }}" class="btn btn-sm btn-outline-secondary" title="Reset">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
+      </div>
+    </form>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle custom-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Roll Number</th>
+            <th>Student Name</th>
+            <th>Class</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+            <tr>
+              <td><span class="font-monospace text-muted">{{ r.date.strftime('%Y-%m-%d') }}</span></td>
+              <td><code>{{ r.student.roll_number }}</code></td>
+              <td class="fw-medium">{{ r.student.name }}</td>
+              <td>{{ r.classroom.display_name }}</td>
+              <td><span class="badge bg-light text-dark border">{{ r.subject.code }}</span> {{ r.subject.name }}</td>
+              <td>
+                {% if r.status == 'Present' %}
+                  <span class="badge-status badge-present"><i class="bi bi-check-circle-fill"></i> Present</span>
+                {% elif r.status == 'Absent' %}
+                  <span class="badge-status badge-absent"><i class="bi bi-x-circle-fill"></i> Absent</span>
+                {% else %}
+                  <span class="badge-status badge-late"><i class="bi bi-clock-fill"></i> Late</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ r.remarks or '-' }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                No attendance records found for the chosen filters.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

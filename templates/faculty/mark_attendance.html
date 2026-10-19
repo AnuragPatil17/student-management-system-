@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance{% endblock %}
+{% block header_title %}Record Student Attendance{% endblock %}
+
+{% block content %}
+<div class="custom-card">
+  <div class="custom-card-header flex-wrap gap-2">
+    <h2 class="custom-card-title">
+      <i class="bi bi-calendar-check-fill text-primary"></i> Daily Attendance Register
+    </h2>
+    
+    <!-- Real-time Counters -->
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="badge bg-secondary-subtle text-secondary">
+        Total: <strong id="countTotal">{{ students|length }}</strong>
+      </span>
+      <span class="badge bg-success-subtle text-success">
+        Present: <strong id="countPresent">0</strong>
+      </span>
+      <span class="badge bg-danger-subtle text-danger">
+        Absent: <strong id="countAbsent">0</strong>
+      </span>
+      <span class="badge bg-warning-subtle text-warning">
+        Late: <strong id="countLate">0</strong>
+      </span>
+    </div>
+  </div>
+
+  <div class="custom-card-body">
+    <!-- Filter Bar: Department, Class, Subject, Date -->
+    <form method="GET" action="{{ url_for('faculty.mark_attendance') }}" class="row g-3 mb-4 bg-light p-3 rounded-3 border" id="attendanceFilterForm">
+      <div class="col-md-3 col-sm-6">
+        <label class="form-label small fw-bold">Department</label>
+        <select name="department_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          {% for d in departments %}
+            <option value="{{ d.id }}" {% if selected_dept_id == d.id %}selected{% endif %}>{{ d.name }} ({{ d.code }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <label class="form-label small fw-bold">Class / Division</label>
+        <select name="class_id" id="selectClass" class="form-select form-select-sm" onchange="this.form.submit()">
+          {% for cl in classes %}
+            <option value="{{ cl.id }}" {% if selected_class_id == cl.id %}selected{% endif %}>{{ cl.display_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <label class="form-label small fw-bold">Assigned Subject</label>
+        <select name="subject_id" id="selectSubject" class="form-select form-select-sm" onchange="this.form.submit()">
+          {% for subj in subjects %}
+            <option value="{{ subj.id }}" {% if selected_subject_id == subj.id %}selected{% endif %}>{{ subj.code }} - {{ subj.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <label class="form-label small fw-bold">Session Date</label>
+        <input type="date" name="date" id="selectDate" class="form-control form-control-sm" value="{{ selected_date }}" onchange="this.form.submit()">
+      </div>
+    </form>
+
+    <!-- Duplicate Warning Box (Managed dynamically by static/js/faculty.js or server-side flag) -->
+    <div id="duplicateWarningBox" class="{% if not is_existing_record %}d-none{% endif %}">
+      <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <div>
+          <strong>Attendance Already Recorded:</strong> Records for this Subject, Class, and Date already exist.
+          Submitting will <strong>update and correct</strong> the attendance status for this session.
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Action Toolbar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="text-secondary small">
+        <i class="bi bi-info-circle me-1"></i> Click P, A, or L to set each student's attendance.
+      </span>
+      <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" id="markAllPresentBtn">
+        <i class="bi bi-check-all me-1"></i> Mark All Present
+      </button>
+    </div>
+
+    <!-- Attendance Submission Form -->
+    <form method="POST" action="{{ url_for('faculty.save_attendance') }}" id="saveAttendanceForm">
+      <input type="hidden" name="class_id" value="{{ selected_class_id }}">
+      <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
+      <input type="hidden" name="date" value="{{ selected_date }}">
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle custom-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">#</th>
+              <th>Roll Number</th>
+              <th>Student Name</th>
+              <th style="width: 260px;" class="text-center">Status (P / A / L)</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in students %}
+              {% set current_status = existing_attendance.get(s.id, 'Present') %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td><span class="badge bg-light text-dark border font-monospace">{{ s.roll_number }}</span></td>
+                <td class="fw-semibold">{{ s.name }}</td>
+                <td class="text-center">
+                  <!-- Hidden input storing status for this student -->
+                  <input type="hidden" name="status_{{ s.id }}" id="status_input_{{ s.id }}" class="att-status-input" value="{{ current_status }}">
+
+                  <!-- Button Group for P, A, L -->
+                  <div class="attendance-toggle-group">
+                    <button 
+                      type="button" 
+                      class="att-option-btn {% if current_status == 'Present' %}selected-p{% endif %}" 
+                      data-student-id="{{ s.id }}" 
+                      data-status="Present"
+                    >
+                      P
+                    </button>
+                    <button 
+                      type="button" 
+                      class="att-option-btn {% if current_status == 'Absent' %}selected-a{% endif %}" 
+                      data-student-id="{{ s.id }}" 
+                      data-status="Absent"
+                    >
+                      A
+                    </button>
+                    <button 
+                      type="button" 
+                      class="att-option-btn {% if current_status == 'Late' %}selected-l{% endif %}" 
+                      data-student-id="{{ s.id }}" 
+                      data-status="Late"
+                    >
+                      L
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    name="remarks_{{ s.id }}" 
+                    class="form-control form-control-sm" 
+                    placeholder="Optional remarks..."
+                    value="{{ existing_remarks.get(s.id, '') }}"
+                  >
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                  No students found in this selected class. Please select another class or contact admin.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if students %}
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" id="saveAttendanceBtn">
+            <i class="bi bi-check2-circle me-1"></i>
+            {% if is_existing_record %}Update Attendance Records{% else %}Save Attendance Records{% endif %}
+          </button>
+        </div>
+      {% endif %}
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Dedicated Faculty JavaScript -->
+<script src="{{ url_for('static', filename='js/faculty.js') }}"></script>
+{% endblock %}

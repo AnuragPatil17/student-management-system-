@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Reports{% endblock %}
+{% block header_title %}Institutional Attendance Reports{% endblock %}
+
+{% block content %}
+<div class="custom-card">
+  <div class="custom-card-header flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+      <h2 class="custom-card-title">
+        <i class="bi bi-file-earmark-bar-graph-fill text-primary"></i> Attendance Audit & Reports
+      </h2>
+      <span class="badge bg-light text-secondary border">{{ records|length }} Records Found</span>
+    </div>
+
+    <!-- Export to CSV Button -->
+    <a href="{{ url_for('admin.export_csv', from_date=filters.from_date, to_date=filters.to_date, department_id=filters.department_id, class_id=filters.class_id, subject_id=filters.subject_id) }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+      <i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Export Report to CSV
+    </a>
+  </div>
+
+  <div class="custom-card-body">
+    <!-- Filter Form -->
+    <form method="GET" action="{{ url_for('admin.reports') }}" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+      <div class="col-md-3 col-sm-6">
+        <label class="form-label small fw-bold">From Date</label>
+        <input type="date" name="from_date" class="form-control form-control-sm" value="{{ filters.from_date }}">
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <label class="form-label small fw-bold">To Date</label>
+        <input type="date" name="to_date" class="form-control form-control-sm" value="{{ filters.to_date }}">
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <label class="form-label small fw-bold">Department</label>
+        <select name="department_id" class="form-select form-select-sm">
+          <option value="">All Departments</option>
+          {% for d in departments %}
+            <option value="{{ d.id }}" {% if filters.department_id == d.id|string %}selected{% endif %}>{{ d.code }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <label class="form-label small fw-bold">Class</label>
+        <select name="class_id" class="form-select form-select-sm">
+          <option value="">All Classes</option>
+          {% for cl in classes %}
+            <option value="{{ cl.id }}" {% if filters.class_id == cl.id|string %}selected{% endif %}>{{ cl.display_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 col-sm-12 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-sm btn-primary w-100">
+          <i class="bi bi-funnel-fill me-1"></i> Filter
+        </button>
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-outline-secondary" title="Reset Filters">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
+      </div>
+    </form>
+
+    <!-- Report Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle custom-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Roll Number</th>
+            <th>Student Name</th>
+            <th>Class</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Recorded By</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+            <tr>
+              <td><span class="font-monospace text-muted">{{ r.date.strftime('%Y-%m-%d') }}</span></td>
+              <td><code>{{ r.student.roll_number }}</code></td>
+              <td class="fw-medium">{{ r.student.name }}</td>
+              <td>{{ r.classroom.display_name }}</td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ r.subject.code }}</span>
+                <small class="text-muted ms-1">{{ r.subject.name }}</small>
+              </td>
+              <td>
+                {% if r.status == 'Present' %}
+                  <span class="badge-status badge-present"><i class="bi bi-check-circle-fill"></i> Present</span>
+                {% elif r.status == 'Absent' %}
+                  <span class="badge-status badge-absent"><i class="bi bi-x-circle-fill"></i> Absent</span>
+                {% else %}
+                  <span class="badge-status badge-late"><i class="bi bi-clock-fill"></i> Late</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ r.recorded_by.name if r.recorded_by else 'Admin' }}</td>
+              <td class="small text-muted">{{ r.remarks or '-' }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="8" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-2 d-block text-secondary mb-2"></i>
+                No attendance records match the selected filter criteria.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

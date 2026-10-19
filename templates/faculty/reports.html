@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Attendance Reports{% endblock %}
+{% block header_title %}Class & Subject Attendance Analytics{% endblock %}
+
+{% block content %}
+<div class="custom-card">
+  <div class="custom-card-header flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+      <h2 class="custom-card-title">
+        <i class="bi bi-pie-chart-fill text-primary"></i> Subject Attendance Percentage Summary
+      </h2>
+    </div>
+  </div>
+
+  <div class="custom-card-body">
+    <!-- Filter Bar -->
+    <form method="GET" action="{{ url_for('faculty.reports') }}" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+      <div class="col-md-5">
+        <label class="form-label small fw-bold">Select Subject</label>
+        <select name="subject_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          {% for subj in assigned_subjects %}
+            <option value="{{ subj.id }}" {% if selected_subject.id == subj.id %}selected{% endif %}>
+              {{ subj.code }} - {{ subj.name }} (Sem {{ subj.semester }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label small fw-bold">Timeframe Period</label>
+        <select name="period" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="all" {% if period == 'all' %}selected{% endif %}>All-Time (Current Semester)</option>
+          <option value="month" {% if period == 'month' %}selected{% endif %}>Monthly (Past 30 Days)</option>
+          <option value="week" {% if period == 'week' %}selected{% endif %}>Weekly (Past 7 Days)</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 d-flex align-items-end">
+        <a href="{{ url_for('faculty.reports') }}" class="btn btn-sm btn-outline-secondary w-100">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset View
+        </a>
+      </div>
+    </form>
+
+    <!-- Student Attendance Percentage Table -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle custom-table">
+        <thead>
+          <tr>
+            <th>Roll Number</th>
+            <th>Student Name</th>
+            <th>Lectures Conducted</th>
+            <th>Attended</th>
+            <th>Absences</th>
+            <th>Attendance %</th>
+            <th>Status Indicator</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in student_stats %}
+            <tr>
+              <td><code>{{ item.student.roll_number }}</code></td>
+              <td class="fw-medium">{{ item.student.name }}</td>
+              <td>{{ item.total_classes }}</td>
+              <td class="text-success fw-bold">{{ item.attended }}</td>
+              <td class="text-danger fw-bold">{{ item.absent }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height: 8px;">
+                    <div 
+                      class="progress-bar {% if item.percentage >= 75 %}bg-success{% else %}bg-danger{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ item.percentage }}%;"
+                    ></div>
+                  </div>
+                  <span class="small fw-bold">{{ item.percentage }}%</span>
+                </div>
+              </td>
+              <td>
+                {% if item.percentage >= 75 %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-check-circle me-1"></i> Satisfactory
+                  </span>
+                {% else %}
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Low Attendance (&lt;75%)
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                No attendance recorded for this subject during the selected period.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

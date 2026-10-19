@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Institute - Cloud Attendance Management System</title>
+  
+  <!-- College Emblem Favicon -->
+  <link rel="icon" type="image/jpeg" href="static/images/college_logo.jpg">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Main Linked Stylesheet (Directly Connected) -->
+  <link rel="stylesheet" href="static/css/style.css">
+
+  <style>
+    /* Live Server Quick Switcher Banner */
+    .live-demo-ribbon {
+      background: linear-gradient(90deg, #0f2b5c, #1e40af);
+      color: #ffffff;
+      padding: 6px 16px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .live-demo-ribbon .btn-role-switch {
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .live-demo-ribbon .btn-role-switch:hover,
+    .live-demo-ribbon .btn-role-switch.active {
+      background: #ffffff;
+      color: #0f2b5c;
+    }
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Demo Ribbon for Live Server -->
+  <div class="live-demo-ribbon" id="demoRibbon">
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-success rounded-pill px-2 py-1"><i class="bi bi-broadcast me-1"></i> Live Server Ready</span>
+      <span class="d-none d-md-inline text-white-50">Apex Institute of Technology & Science</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="small text-white-50 d-none d-sm-inline">Quick Portal Switch:</span>
+      <button class="btn-role-switch active" onclick="switchView('loginView')"><i class="bi bi-box-arrow-in-right"></i> Login</button>
+      <button class="btn-role-switch" onclick="performDirectLogin('admin')"><i class="bi bi-shield-lock"></i> Admin</button>
+      <button class="btn-role-switch" onclick="performDirectLogin('faculty')"><i class="bi bi-person-video3"></i> Faculty</button>
+      <button class="btn-role-switch" onclick="performDirectLogin('student')"><i class="bi bi-mortarboard"></i> Student</button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 1. LOGIN VIEW                                                             -->
+  <!-- ========================================================================= -->
+  <div id="loginView" class="view-section active">
+    <div class="login-body">
+      <div class="login-backdrop"></div>
+      <div class="login-container">
+        <div class="login-card">
+          <div class="login-header">
+            <img src="static/images/college_logo.jpg" alt="College Seal" class="college-logo-img">
+            <h2 class="college-name">Apex Institute of Technology</h2>
+            <div class="app-title-badge">
+              <i class="bi bi-cloud-check-fill me-1"></i> Cloud Attendance Portal
+            </div>
+            <p class="login-subtitle">Secure Academic Attendance Management System</p>
+          </div>
+
+          <div id="loginAlertBox"></div>
+
+          <!-- Role Selector Tabs -->
+          <label class="form-label small fw-bold text-secondary mb-1">Select Login Role</label>
+          <div class="role-tabs">
+            <button type="button" class="role-tab-btn active" data-role="admin" onclick="selectLoginRole('admin')">
+              <i class="bi bi-shield-lock-fill"></i> Admin
+            </button>
+            <button type="button" class="role-tab-btn" data-role="faculty" onclick="selectLoginRole('faculty')">
+              <i class="bi bi-person-video3"></i> Faculty
+            </button>
+            <button type="button" class="role-tab-btn" data-role="student" onclick="selectLoginRole('student')">
+              <i class="bi bi-mortarboard-fill"></i> Student
+            </button>
+          </div>
+
+          <!-- Login Form -->
+          <form id="standaloneLoginForm" onsubmit="handleLoginSubmit(event)">
+            <input type="hidden" id="loginRoleInput" value="admin">
+
+            <div class="input-group-custom">
+              <label for="loginId">Email Address or Username</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person-fill input-icon"></i>
+                <input type="text" class="form-control" id="loginId" value="admin@college.edu" required>
+              </div>
+            </div>
+
+            <div class="input-group-custom">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label for="password" class="mb-0">Password</label>
+                <a href="javascript:void(0)" onclick="showToast('For demo accounts, use password: admin123, faculty123, or student123.', 'info')" class="small text-decoration-none">Forgot Password?</a>
+              </div>
+              <div class="input-with-icon">
+                <i class="bi bi-lock-fill input-icon"></i>
+                <input type="password" class="form-control" id="password" value="admin123" required>
+                <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility()">
+                  <i class="bi bi-eye" id="pwdEyeIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-college-primary mt-3" id="loginSubmitBtn">
+              <i class="bi bi-box-arrow-in-right fs-5"></i>
+              <span>Sign In to Portal</span>
+            </button>
+          </form>
+
+          <!-- 1-Click Demo Accounts Quick-Fill Box -->
+          <div class="demo-accounts-box">
+            <div class="demo-title">
+              <span><i class="bi bi-key-fill text-primary me-1"></i> Quick 1-Click Test Logins</span>
+              <span class="badge bg-light text-muted border">Auto-fill & Launch</span>
+            </div>
+            <div class="demo-btn-group">
+              <button type="button" class="btn-demo-pill" onclick="performDirectLogin('admin')">
+                <i class="bi bi-shield-check text-primary"></i> Administrator
+              </button>
+              <button type="button" class="btn-demo-pill" onclick="performDirectLogin('faculty')">
+                <i class="bi bi-person-workspace text-success"></i> Faculty
+              </button>
+              <button type="button" class="btn-demo-pill" onclick="performDirectLogin('student')">
+                <i class="bi bi-mortarboard text-warning"></i> Student
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION SHELL (ADMIN / FACULTY / STUDENT)                     -->
+  <!-- ========================================================================= -->
+  <div id="appShellView" class="view-section">
+    <div class="app-wrapper">
+      
+      <!-- Dynamic Sidebar Navigation -->
+      <aside class="app-sidebar" id="appSidebar">
+        <div class="sidebar-brand">
+          <img src="static/images/college_logo.jpg" alt="College Emblem" class="sidebar-brand-logo">
+          <div class="sidebar-brand-text">
+            Apex Institute
+            <small>Attendance Cloud</small>
+          </div>
+        </div>
+
+        <ul class="sidebar-menu" id="dynamicSidebarMenu">
+          <!-- Dynamically populated based on active role -->
+        </ul>
+
+        <!-- Sidebar User Profile Info Box -->
+        <div class="sidebar-user">
+          <div class="user-avatar-circle" id="sidebarAvatar">A</div>
+          <div class="user-info-text">
+            <div class="user-info-name" id="sidebarUserName">Dr. Rajesh Sharma</div>
+            <div class="user-info-role" id="sidebarUserRole">Administrator</div>
+          </div>
+          <a href="javascript:void(0)" onclick="logoutToLogin()" class="text-white-50 hover-white ms-auto" title="Log Out">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="app-main">
+        <header class="app-topbar">
+          <div class="topbar-left">
+            <button class="sidebar-toggler-btn" id="sidebarToggler" onclick="toggleSidebar()">
+              <i class="bi bi-list"></i>
+            </button>
+            <h1 class="page-title" id="pageHeaderTitle">Student Attendance Management System</h1>
+          </div>
+
+          <div class="topbar-right">
+            <div class="cloud-status-pill d-none d-sm-flex" title="Cloud Database Connection Active">
+              <span class="cloud-dot"></span>
+              <span>Live Server Active</span>
+            </div>
+
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-person-fill text-primary me-1"></i>
+                <span class="fw-semibold" id="topbarUsername">admin</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                <li class="dropdown-header">
+                  <strong id="dropdownUserTitle">Apex Institute</strong><br>
+                  <small class="text-muted" id="dropdownUserEmail">admin@college.edu</small>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="logoutToLogin()">
+                    <i class="bi bi-box-arrow-right me-2"></i> Log Out
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main Body Content Placeholder -->
+        <main class="page-content" id="mainPortalContent">
+          <!-- Dynamically injected view content -->
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1200;"></div>
+
+  <!-- Modal: Add Student -->
+  <div class="modal fade" id="modalAddStudent" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form onsubmit="handleModalAddStudent(event)">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-person-plus text-primary me-2"></i>Enroll New Student</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Full Name *</label>
+                <input type="text" id="add_name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Roll Number *</label>
+                <input type="text" id="add_roll" class="form-control" placeholder="e.g. CS2026011" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">College Email *</label>
+                <input type="email" id="add_email" class="form-control" placeholder="e.g. rahul.s@college.edu" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Department *</label>
+                <select id="add_dept" class="form-select" required>
+                  <option value="CS">Computer Science (CS)</option>
+                  <option value="IT">Information Technology (IT)</option>
+                  <option value="ECE">Electronics (ECE)</option>
+                  <option value="ME">Mechanical Engineering (ME)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Class / Section *</label>
+                <select id="add_class" class="form-select" required>
+                  <option value="CS - Sem 6 (Sec A)">CS - Sem 6 (Sec A)</option>
+                  <option value="CS - Sem 6 (Sec B)">CS - Sem 6 (Sec B)</option>
+                  <option value="IT - Sem 6 (Sec A)">IT - Sem 6 (Sec A)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Contact Phone</label>
+                <input type="text" id="add_phone" class="form-control" placeholder="+91 98222 33445">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Enroll Student</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js CDN for interactive visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Complete Standalone JavaScript Controller for VS Code Live Server -->
+  <script>
+    // In-memory data store mimicking database records
+    const initialData = {
+      students: [
+        { id: 1, roll: 'CS2026001', name: 'Aarav Patel', email: 'aarav.patel@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 91.7, attended: 33, absent: 3, late: 2, status: 'Present' },
+        { id: 2, roll: 'CS2026002', name: 'Priya Sharma', email: 'priya.sharma@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 95.0, attended: 36, absent: 1, late: 1, status: 'Present' },
+        { id: 3, roll: 'CS2026003', name: 'Rohan Gupta', email: 'rohan.gupta@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 66.7, attended: 24, absent: 12, late: 2, status: 'Absent' },
+        { id: 4, roll: 'CS2026004', name: 'Ananya Iyer', email: 'ananya.iyer@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 86.1, attended: 31, absent: 4, late: 3, status: 'Present' },
+        { id: 5, roll: 'CS2026005', name: 'Kabir Mehra', email: 'kabir.mehra@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 69.4, attended: 25, absent: 10, late: 3, status: 'Late' },
+        { id: 6, roll: 'CS2026006', name: 'Sneha Kulkarni', email: 'sneha.k@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 88.9, attended: 32, absent: 4, late: 2, status: 'Present' },
+        { id: 7, roll: 'CS2026007', name: 'Aditya Singh', email: 'aditya.s@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 92.5, attended: 37, absent: 2, late: 1, status: 'Present' },
+        { id: 8, roll: 'CS2026008', name: 'Diya Kapoor', email: 'diya.k@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 83.3, attended: 30, absent: 5, late: 3, status: 'Present' },
+        { id: 9, roll: 'CS2026009', name: 'Vikram Malhotra', email: 'vikram.m@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 77.8, attended: 28, absent: 6, late: 4, status: 'Present' },
+        { id: 10, roll: 'CS2026010', name: 'Ishaan Deshmukh', email: 'ishaan.d@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec A)', sem: 6, rate: 94.4, attended: 34, absent: 2, late: 2, status: 'Present' },
+        { id: 11, roll: 'CS2026101', name: 'Meera Nair', email: 'meera.nair@college.edu', dept: 'CS', class_name: 'CS - Sem 6 (Sec B)', sem: 6, rate: 86.1, attended: 31, absent: 5, late: 2, status: 'Present' },
+        { id: 12, roll: 'IT2026001', name: 'Tanvi Chawla', email: 'tanvi.c@college.edu', dept: 'IT', class_name: 'IT - Sem 6 (Sec A)', sem: 6, rate: 88.9, attended: 32, absent: 4, late: 2, status: 'Present' },
+        { id: 13, roll: 'IT2026002', name: 'Devendra Roy', email: 'devendra.r@college.edu', dept: 'IT', class_name: 'IT - Sem 6 (Sec A)', sem: 6, rate: 72.2, attended: 26, absent: 9, late: 3, status: 'Absent' }
+      ],
+      faculty: [
+        { id: 1, code: 'FAC-CS-101', name: 'Prof. Anurag Verma', dept: 'CS', designation: 'Associate Professor & Cloud Lead', subjects: ['CS601 (Cloud Computing)', 'CS603 (Software Engineering & DevOps)'] },
+        { id: 2, code: 'FAC-CS-102', name: 'Dr. Neha Saxena', dept: 'CS', designation: 'Assistant Professor', subjects: ['CS602 (Distributed Database Systems)'] },
+        { id: 3, code: 'FAC-IT-201', name: 'Prof. Vikrant Joshi', dept: 'IT', designation: 'Assistant Professor', subjects: ['IT601 (Full Stack Web Development)'] }
+      ],
+      activeRole: 'admin',
+      activeTab: 'dashboard'
+    };
+
+    // Load or initialize state
+    let appState = JSON.parse(localStorage.getItem('apex_attendance_data') || 'null') || initialData;
+    function saveState() {
+      localStorage.setItem('apex_attendance_data', JSON.stringify(appState));
+    }
+
+    // Role switcher & navigation
+    function selectLoginRole(role) {
+      document.querySelectorAll('.role-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-role') === role);
+      });
+      document.getElementById('loginRoleInput').value = role;
+      
+      const loginIdInput = document.getElementById('loginId');
+      const pwdInput = document.getElementById('password');
+      if (role === 'admin') {
+        loginIdInput.value = 'admin@college.edu';
+        pwdInput.value = 'admin123';
+      } else if (role === 'faculty') {
+        loginIdInput.value = 'anurag.verma@college.edu';
+        pwdInput.value = 'faculty123';
+      } else if (role === 'student') {
+        loginIdInput.value = 'aarav.patel@college.edu';
+        pwdInput.value = 'student123';
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('password');
+      const icon = document.getElementById('pwdEyeIcon');
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+      } else {
+        pwdInput.type = 'password';
+        icon.className = 'bi bi-eye';
+      }
+    }
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+
+    function performDirectLogin(role) {
+      appState.activeRole = role;
+      selectLoginRole(role);
+      launchPortal(role);
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const role = document.getElementById('loginRoleInput').value;
+      appState.activeRole = role;
+      launchPortal(role);
+    }
+
+    function logoutToLogin() {
+      switchView('loginView');
+      showToast('You have been logged out securely.', 'info');
+    }
+
+    function launchPortal(role, tab = 'dashboard') {
+      appState.activeRole = role;
+      appState.activeTab = tab;
+      switchView('appShellView');
+
+      // Update Top Ribbon Buttons
+      document.querySelectorAll('.btn-role-switch').forEach(b => {
+        b.classList.remove('active');
+        if (b.textContent.toLowerCase().includes(role)) b.classList.add('active');
+      });
+
+      renderSidebar(role);
+      renderPortalContent(role, tab);
+    }
+
+    function renderSidebar(role) {
+      const menu = document.getElementById('dynamicSidebarMenu');
+      const avatar = document.getElementById('sidebarAvatar');
+      const nameEl = document.getElementById('sidebarUserName');
+      const roleEl = document.getElementById('sidebarUserRole');
+      const topName = document.getElementById('topbarUsername');
+      const headerTitle = document.getElementById('pageHeaderTitle');
+
+      if (role === 'admin') {
+        avatar.textContent = 'A';
+        nameEl.textContent = 'Dr. Rajesh Sharma';
+        roleEl.textContent = 'Administrator';
+        topName.textContent = 'admin';
+        headerTitle.textContent = 'Administrator Control Center';
+
+        menu.innerHTML = `
+          <li class="sidebar-menu-header">Administrator</li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('admin', 'dashboard')" class="sidebar-nav-link ${appState.activeTab === 'dashboard' ? 'active' : ''}">
+              <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('admin', 'students')" class="sidebar-nav-link ${appState.activeTab === 'students' ? 'active' : ''}">
+              <i class="bi bi-people-fill"></i> <span>Manage Students</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('admin', 'faculty')" class="sidebar-nav-link ${appState.activeTab === 'faculty' ? 'active' : ''}">
+              <i class="bi bi-person-badge-fill"></i> <span>Manage Faculty</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('admin', 'academics')" class="sidebar-nav-link ${appState.activeTab === 'academics' ? 'active' : ''}">
+              <i class="bi bi-mortarboard-fill"></i> <span>Academics & Depts</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('admin', 'reports')" class="sidebar-nav-link ${appState.activeTab === 'reports' ? 'active' : ''}">
+              <i class="bi bi-file-earmark-bar-graph-fill"></i> <span>Attendance Reports</span>
+            </a>
+          </li>
+        `;
+      } else if (role === 'faculty') {
+        avatar.textContent = 'V';
+        nameEl.textContent = 'Prof. Anurag Verma';
+        roleEl.textContent = 'Faculty Member';
+        topName.textContent = 'prof.anurag';
+        headerTitle.textContent = 'Faculty Instruction & Attendance Portal';
+
+        menu.innerHTML = `
+          <li class="sidebar-menu-header">Faculty Portal</li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('faculty', 'dashboard')" class="sidebar-nav-link ${appState.activeTab === 'dashboard' ? 'active' : ''}">
+              <i class="bi bi-house-door-fill"></i> <span>Faculty Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('faculty', 'mark')" class="sidebar-nav-link ${appState.activeTab === 'mark' ? 'active' : ''}">
+              <i class="bi bi-check2-square"></i> <span>Mark Attendance</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('faculty', 'logs')" class="sidebar-nav-link ${appState.activeTab === 'logs' ? 'active' : ''}">
+              <i class="bi bi-card-checklist"></i> <span>Attendance Logs</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('faculty', 'reports')" class="sidebar-nav-link ${appState.activeTab === 'reports' ? 'active' : ''}">
+              <i class="bi bi-pie-chart-fill"></i> <span>Summary Reports</span>
+            </a>
+          </li>
+        `;
+      } else if (role === 'student') {
+        avatar.textContent = 'A';
+        nameEl.textContent = 'Aarav Patel';
+        roleEl.textContent = 'Student (CS Sem 6)';
+        topName.textContent = 'aarav01';
+        headerTitle.textContent = 'Student Attendance Analytics';
+
+        menu.innerHTML = `
+          <li class="sidebar-menu-header">Student Portal</li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('student', 'dashboard')" class="sidebar-nav-link ${appState.activeTab === 'dashboard' ? 'active' : ''}">
+              <i class="bi bi-person-circle"></i> <span>My Attendance</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="javascript:void(0)" onclick="launchPortal('student', 'history')" class="sidebar-nav-link ${appState.activeTab === 'history' ? 'active' : ''}">
+              <i class="bi bi-calendar-check-fill"></i> <span>Attendance History</span>
+            </a>
+          </li>
+        `;
+      }
+    }
+
+    function renderPortalContent(role, tab) {
+      const container = document.getElementById('mainPortalContent');
+
+      // ----------------- ADMIN PORTAL -----------------
+      if (role === 'admin') {
+        if (tab === 'dashboard') {
+          const lowAtt = appState.students.filter(s => s.rate < 75);
+          container.innerHTML = `
+            <!-- Top Metrics Row -->
+            <div class="row g-4 mb-4">
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+                  <div class="stat-info">
+                    <h3>${appState.students.length}</h3>
+                    <p>Total Enrolled Students</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon green"><i class="bi bi-person-badge-fill"></i></div>
+                  <div class="stat-info">
+                    <h3>${appState.faculty.length}</h3>
+                    <p>Faculty Members</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon purple"><i class="bi bi-building"></i></div>
+                  <div class="stat-info">
+                    <h3>4</h3>
+                    <p>Academic Departments</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon orange"><i class="bi bi-check2-circle"></i></div>
+                  <div class="stat-info">
+                    <h3>396</h3>
+                    <p>Attendance Logs Recorded</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row g-4 mb-4">
+              <div class="col-lg-8">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header">
+                    <h2 class="custom-card-title"><i class="bi bi-graph-up text-primary"></i> Attendance Trend (Recent Sessions)</h2>
+                    <span class="badge bg-light text-secondary border">Live Sync Active</span>
+                  </div>
+                  <div class="custom-card-body">
+                    <div style="height: 290px;"><canvas id="adminTrendChart"></canvas></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header">
+                    <h2 class="custom-card-title"><i class="bi bi-pie-chart text-success"></i> Status Ratio</h2>
+                  </div>
+                  <div class="custom-card-body">
+                    <div style="height: 290px;"><canvas id="adminRatioChart"></canvas></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Low Attendance Alerts Row -->
+            <div class="custom-card mb-4">
+              <div class="custom-card-header">
+                <h2 class="custom-card-title text-danger">
+                  <i class="bi bi-exclamation-triangle-fill"></i> Low Attendance Alerts (&lt; 75%)
+                </h2>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">${lowAtt.length} Flagged Students</span>
+              </div>
+              <div class="custom-card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Roll No</th>
+                        <th>Class</th>
+                        <th>Attendance Rate</th>
+                        <th class="text-end pe-4">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${lowAtt.map(s => `
+                        <tr>
+                          <td class="ps-4"><strong>${s.name}</strong><br><small class="text-muted">${s.dept}</small></td>
+                          <td><code>${s.roll}</code></td>
+                          <td>${s.class_name}</td>
+                          <td><span class="badge bg-danger">${s.rate}%</span></td>
+                          <td class="text-end pe-4">
+                            <button onclick="launchPortal('admin', 'reports')" class="btn btn-sm btn-outline-primary py-0">View Log</button>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+          setTimeout(initAdminCharts, 50);
+        } else if (tab === 'students') {
+          container.innerHTML = `
+            <div class="custom-card">
+              <div class="custom-card-header flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                  <h2 class="custom-card-title"><i class="bi bi-people-fill text-primary"></i> Enrolled Students Directory</h2>
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle">${appState.students.length} Students</span>
+                </div>
+                <button class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalAddStudent">
+                  <i class="bi bi-person-plus-fill me-1"></i> Add New Student
+                </button>
+              </div>
+              <div class="custom-card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle custom-table">
+                    <thead>
+                      <tr>
+                        <th>Roll Number</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Class / Section</th>
+                        <th>Semester</th>
+                        <th>Rate %</th>
+                        <th class="text-end">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${appState.students.map(s => `
+                        <tr>
+                          <td><span class="badge bg-light text-dark border font-monospace">${s.roll}</span></td>
+                          <td><strong>${s.name}</strong><br><small class="text-muted">${s.email}</small></td>
+                          <td><span class="badge bg-info-subtle text-info border border-info-subtle">${s.dept}</span></td>
+                          <td>${s.class_name}</td>
+                          <td>Semester ${s.sem}</td>
+                          <td><span class="badge ${s.rate >= 75 ? 'bg-success' : 'bg-danger'}">${s.rate}%</span></td>
+                          <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${s.id})"><i class="bi bi-trash"></i></button>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (tab === 'faculty') {
+          container.innerHTML = `
+            <div class="custom-card">
+              <div class="custom-card-header">
+                <h2 class="custom-card-title"><i class="bi bi-person-badge-fill text-primary"></i> Faculty Members Directory</h2>
+                <span class="badge bg-light text-secondary border">${appState.faculty.length} Faculty Members</span>
+              </div>
+              <div class="custom-card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle custom-table">
+                    <thead>
+                      <tr>
+                        <th>Faculty Code</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Assigned Courses</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${appState.faculty.map(f => `
+                        <tr>
+                          <td><span class="badge bg-light text-dark border font-monospace">${f.code}</span></td>
+                          <td><strong>${f.name}</strong></td>
+                          <td><span class="badge bg-info-subtle text-info">${f.dept}</span></td>
+                          <td>${f.designation}</td>
+                          <td>${f.subjects.map(sub => `<span class="badge bg-secondary-subtle text-secondary me-1">${sub}</span>`).join('')}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (tab === 'academics') {
+          container.innerHTML = `
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header"><h3 class="custom-card-title"><i class="bi bi-building text-primary"></i> Departments</h3></div>
+                  <div class="custom-card-body p-0">
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div><strong>Computer Science & Engg</strong><div class="small text-muted">Code: CS</div></div>
+                        <span class="badge bg-primary">10 Students</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div><strong>Information Technology</strong><div class="small text-muted">Code: IT</div></div>
+                        <span class="badge bg-primary">2 Students</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div><strong>Electronics & Comm</strong><div class="small text-muted">Code: ECE</div></div>
+                        <span class="badge bg-primary">0 Students</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div><strong>Mechanical Engg</strong><div class="small text-muted">Code: ME</div></div>
+                        <span class="badge bg-primary">0 Students</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header"><h3 class="custom-card-title"><i class="bi bi-diagram-3 text-info"></i> Classes & Sections</h3></div>
+                  <div class="custom-card-body p-0">
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item py-3"><strong>CS - Sem 6 (Sec A)</strong><br><small class="text-muted">10 Enrolled | Academic Year 2025-2026</small></li>
+                      <li class="list-group-item py-3"><strong>CS - Sem 6 (Sec B)</strong><br><small class="text-muted">1 Enrolled | Academic Year 2025-2026</small></li>
+                      <li class="list-group-item py-3"><strong>IT - Sem 6 (Sec A)</strong><br><small class="text-muted">2 Enrolled | Academic Year 2025-2026</small></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header"><h3 class="custom-card-title"><i class="bi bi-book text-success"></i> Course Subjects</h3></div>
+                  <div class="custom-card-body p-0">
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item py-3"><strong>CS601: Cloud Computing</strong><br><small class="text-muted">Faculty: Prof. Anurag Verma</small></li>
+                      <li class="list-group-item py-3"><strong>CS602: Distributed DBMS</strong><br><small class="text-muted">Faculty: Dr. Neha Saxena</small></li>
+                      <li class="list-group-item py-3"><strong>CS603: DevOps & Software Engg</strong><br><small class="text-muted">Faculty: Prof. Anurag Verma</small></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (tab === 'reports') {
+          container.innerHTML = `
+            <div class="custom-card">
+              <div class="custom-card-header flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                  <h2 class="custom-card-title"><i class="bi bi-file-earmark-bar-graph-fill text-primary"></i> Attendance Audit & Reports</h2>
+                  <span class="badge bg-light text-secondary border">Live Generated Audit</span>
+                </div>
+                <button onclick="downloadSampleCSV()" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                  <i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Export Report to CSV
+                </button>
+              </div>
+              <div class="custom-card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle custom-table">
+                    <thead>
+                      <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Department</th>
+                        <th>Class</th>
+                        <th>Attended</th>
+                        <th>Absences</th>
+                        <th>Rate %</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${appState.students.map(s => `
+                        <tr>
+                          <td><code>${s.roll}</code></td>
+                          <td class="fw-medium">${s.name}</td>
+                          <td><span class="badge bg-light text-dark border">${s.dept}</span></td>
+                          <td>${s.class_name}</td>
+                          <td class="text-success fw-bold">${s.attended}</td>
+                          <td class="text-danger fw-bold">${s.absent}</td>
+                          <td><strong>${s.rate}%</strong></td>
+                          <td>
+                            ${s.rate >= 75 ? '<span class="badge-status badge-present"><i class="bi bi-check-circle-fill"></i> Safe</span>' : '<span class="badge-status badge-absent"><i class="bi bi-exclamation-triangle-fill"></i> Low (&lt;75%)</span>'}
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // ----------------- FACULTY PORTAL -----------------
+      else if (role === 'faculty') {
+        if (tab === 'dashboard') {
+          container.innerHTML = `
+            <div class="custom-card mb-4" style="background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);">
+              <div class="custom-card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="user-avatar-circle" style="width: 58px; height: 58px; font-size: 1.5rem;">V</div>
+                  <div>
+                    <h2 class="h4 mb-1 fw-bold text-navy">Prof. Anurag Verma</h2>
+                    <div class="text-secondary small d-flex flex-wrap align-items-center gap-2">
+                      <span><i class="bi bi-person-badge text-primary me-1"></i> FAC-CS-101</span>
+                      <span>&bull;</span>
+                      <span><i class="bi bi-building text-primary me-1"></i> Computer Science & Engg</span>
+                      <span>&bull;</span>
+                      <span><i class="bi bi-award text-primary me-1"></i> Associate Professor & Cloud Lead</span>
+                    </div>
+                  </div>
+                </div>
+                <button onclick="launchPortal('faculty', 'mark')" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+                  <i class="bi bi-plus-circle me-1"></i> Mark Today's Attendance
+                </button>
+              </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+              <div class="col-lg-8">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header">
+                    <h3 class="custom-card-title"><i class="bi bi-book-half text-primary"></i> My Assigned Courses</h3>
+                  </div>
+                  <div class="custom-card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                          <tr>
+                            <th class="ps-4">Course Code</th>
+                            <th>Subject Name</th>
+                            <th>Semester</th>
+                            <th class="text-end pe-4">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="ps-4"><span class="badge bg-primary-subtle text-primary font-monospace">CS601</span></td>
+                            <td class="fw-semibold">Cloud Computing & Virtualization</td>
+                            <td>Semester 6</td>
+                            <td class="text-end pe-4"><button onclick="launchPortal('faculty', 'mark')" class="btn btn-sm btn-outline-primary rounded-pill px-3">Mark Attendance</button></td>
+                          </tr>
+                          <tr>
+                            <td class="ps-4"><span class="badge bg-primary-subtle text-primary font-monospace">CS603</span></td>
+                            <td class="fw-semibold">Software Engineering & DevOps</td>
+                            <td>Semester 6</td>
+                            <td class="text-end pe-4"><button onclick="launchPortal('faculty', 'mark')" class="btn btn-sm btn-outline-primary rounded-pill px-3">Mark Attendance</button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header"><h3 class="custom-card-title"><i class="bi bi-calendar-event text-info"></i> Quick Overview</h3></div>
+                  <div class="custom-card-body">
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                      <div class="d-flex justify-content-between mb-1">
+                        <span class="text-secondary small">Total Attendance Logs</span>
+                        <strong class="text-primary">198 Records</strong>
+                      </div>
+                      <div class="d-flex justify-content-between">
+                        <span class="text-secondary small">Sessions Conducted Today</span>
+                        <strong class="text-success">2 Lectures</strong>
+                      </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                      <button onclick="launchPortal('faculty', 'logs')" class="btn btn-outline-secondary text-start py-2">
+                        <i class="bi bi-card-checklist me-2 text-primary"></i> View Previous Attendance Records
+                      </button>
+                      <button onclick="launchPortal('faculty', 'reports')" class="btn btn-outline-secondary text-start py-2">
+                        <i class="bi bi-pie-chart me-2 text-info"></i> Subject Attendance Reports & %
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (tab === 'mark') {
+          const csStudents = appState.students.filter(s => s.dept === 'CS');
+          container.innerHTML = `
+            <div class="custom-card">
+              <div class="custom-card-header flex-wrap gap-2">
+                <h2 class="custom-card-title"><i class="bi bi-calendar-check-fill text-primary"></i> Daily Attendance Register</h2>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="badge bg-secondary-subtle text-secondary">Total: <strong id="countTotal">${csStudents.length}</strong></span>
+                  <span class="badge bg-success-subtle text-success">Present: <strong id="countPresent">${csStudents.filter(s => s.status === 'Present').length}</strong></span>
+                  <span class="badge bg-danger-subtle text-danger">Absent: <strong id="countAbsent">${csStudents.filter(s => s.status === 'Absent').length}</strong></span>
+                  <span class="badge bg-warning-subtle text-warning">Late: <strong id="countLate">${csStudents.filter(s => s.status === 'Late').length}</strong></span>
+                </div>
+              </div>
+              <div class="custom-card-body">
+                <div class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold">Assigned Subject</label>
+                    <select class="form-select form-select-sm" id="facSubjectSelect" onchange="checkDuplicateDemo()">
+                      <option value="CS601">CS601 - Cloud Computing & Virtualization</option>
+                      <option value="CS603">CS603 - Software Engineering & DevOps</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold">Class / Division</label>
+                    <select class="form-select form-select-sm">
+                      <option>CS - Sem 6 (Sec A)</option>
+                      <option>CS - Sem 6 (Sec B)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold">Session Date</label>
+                    <input type="date" class="form-control form-control-sm" id="facDateInput" value="${new Date().toISOString().split('T')[0]}" onchange="checkDuplicateDemo()">
+                  </div>
+                </div>
+
+                <div id="duplicateWarningBox" class="alert alert-warning d-flex align-items-center gap-2 mb-3 d-none">
+                  <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                  <div><strong>Duplicate Session Notice:</strong> Records for this Subject & Date already exist. Submitting will update and correct existing records.</div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="text-secondary small"><i class="bi bi-info-circle me-1"></i> Click P, A, or L to set each student's attendance.</span>
+                  <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="markAllPresent()">
+                    <i class="bi bi-check-all me-1"></i> Mark All Present
+                  </button>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle custom-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th style="width: 220px;" class="text-center">Status (P / A / L)</th>
+                        <th>Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${csStudents.map((s, idx) => `
+                        <tr>
+                          <td>${idx + 1}</td>
+                          <td><span class="badge bg-light text-dark border font-monospace">${s.roll}</span></td>
+                          <td class="fw-semibold">${s.name}</td>
+                          <td class="text-center">
+                            <div class="attendance-toggle-group">
+                              <button type="button" class="att-option-btn ${s.status === 'Present' ? 'selected-p' : ''}" onclick="setAttendanceStatus(${s.id}, 'Present', this)">P</button>
+                              <button type="button" class="att-option-btn ${s.status === 'Absent' ? 'selected-a' : ''}" onclick="setAttendanceStatus(${s.id}, 'Absent', this)">A</button>
+                              <button type="button" class="att-option-btn ${s.status === 'Late' ? 'selected-l' : ''}" onclick="setAttendanceStatus(${s.id}, 'Late', this)">L</button>
+                            </div>
+                          </td>
+                          <td><input type="text" class="form-control form-control-sm" placeholder="Optional remark..."></td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" onclick="saveAttendanceDemo()">
+                    <i class="bi bi-check2-circle me-1"></i> Save Attendance Records
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (tab === 'logs' || tab === 'reports') {
+          container.innerHTML = `
+            <div class="custom-card">
+              <div class="custom-card-header">
+                <h2 class="custom-card-title"><i class="bi bi-pie-chart-fill text-primary"></i> Course Subject Attendance Analytics</h2>
+              </div>
+              <div class="custom-card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle custom-table">
+                    <thead>
+                      <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Total Lectures</th>
+                        <th>Attended</th>
+                        <th>Absent</th>
+                        <th>Attendance Rate</th>
+                        <th>Status Indicator</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${appState.students.slice(0, 8).map(s => `
+                        <tr>
+                          <td><code>${s.roll}</code></td>
+                          <td class="fw-medium">${s.name}</td>
+                          <td>36</td>
+                          <td class="text-success fw-bold">${s.attended}</td>
+                          <td class="text-danger fw-bold">${s.absent}</td>
+                          <td>
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="progress flex-grow-1" style="height: 8px;">
+                                <div class="progress-bar ${s.rate >= 75 ? 'bg-success' : 'bg-danger'}" style="width: ${s.rate}%;"></div>
+                              </div>
+                              <span class="small fw-bold">${s.rate}%</span>
+                            </div>
+                          </td>
+                          <td>
+                            ${s.rate >= 75 ? '<span class="badge bg-success-subtle text-success">Satisfactory</span>' : '<span class="badge bg-danger-subtle text-danger">Low Attendance</span>'}
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // ----------------- STUDENT PORTAL -----------------
+      else if (role === 'student') {
+        const student = appState.students[0]; // Aarav Patel
+        if (tab === 'dashboard') {
+          container.innerHTML = `
+            <div class="custom-card mb-4" style="background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);">
+              <div class="custom-card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="user-avatar-circle" style="width: 58px; height: 58px; font-size: 1.5rem;">A</div>
+                  <div>
+                    <h2 class="h4 mb-1 fw-bold text-navy">${student.name}</h2>
+                    <div class="text-secondary small d-flex flex-wrap align-items-center gap-2">
+                      <span><i class="bi bi-mortarboard text-primary me-1"></i> Roll No: <code>${student.roll}</code></span>
+                      <span>&bull;</span>
+                      <span><i class="bi bi-building text-primary me-1"></i> Computer Science & Engg</span>
+                      <span>&bull;</span>
+                      <span><i class="bi bi-calendar3 text-primary me-1"></i> Semester 6 (Sec A)</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
+                    <i class="bi bi-shield-check me-1"></i> Satisfactory Attendance (91.7%)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metrics Row -->
+            <div class="row g-4 mb-4">
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon green"><i class="bi bi-percent"></i></div>
+                  <div class="stat-info"><h3>91.7%</h3><p>Overall Attendance Rate</p></div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon blue"><i class="bi bi-calendar-range"></i></div>
+                  <div class="stat-info"><h3>36</h3><p>Total Lectures Held</p></div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+                  <div class="stat-info"><h3>33</h3><p>Lectures Attended</p></div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                  <div class="stat-icon purple"><i class="bi bi-clock-history"></i></div>
+                  <div class="stat-info"><h3>3 / 2</h3><p>Absences / Late Sessions</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row g-4 mb-4">
+              <div class="col-lg-4">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header">
+                    <h3 class="custom-card-title"><i class="bi bi-pie-chart text-primary"></i> Attendance Ratio</h3>
+                  </div>
+                  <div class="custom-card-body">
+                    <div style="height: 270px;"><canvas id="studentOverallChart"></canvas></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-8">
+                <div class="custom-card h-100">
+                  <div class="custom-card-header">
+                    <h3 class="custom-card-title"><i class="bi bi-bar-chart-fill text-info"></i> Course Subject Breakdown</h3>
+                  </div>
+                  <div class="custom-card-body">
+                    <div style="height: 270px;"><canvas id="studentSubjectChart"></canvas></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subject Performance Table -->
+            <div class="custom-card mb-4">
+              <div class="custom-card-header"><h3 class="custom-card-title"><i class="bi bi-journal-bookmark-fill text-primary"></i> Course Subject Performance</h3></div>
+              <div class="custom-card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th class="ps-4">Course</th>
+                        <th>Faculty</th>
+                        <th>Conducted</th>
+                        <th>Attended</th>
+                        <th>Absent</th>
+                        <th>Rate</th>
+                        <th class="pe-4">Eligibility</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="ps-4"><strong>CS601: Cloud Computing</strong></td>
+                        <td>Prof. Anurag Verma</td>
+                        <td>12</td>
+                        <td class="text-success fw-bold">11</td>
+                        <td class="text-danger fw-bold">1</td>
+                        <td><div class="progress" style="height: 8px;"><div class="progress-bar bg-success" style="width: 91.7%;"></div></div></td>
+                        <td class="pe-4"><span class="badge bg-success-subtle text-success">Safe</span></td>
+                      </tr>
+                      <tr>
+                        <td class="ps-4"><strong>CS602: Distributed DBMS</strong></td>
+                        <td>Dr. Neha Saxena</td>
+                        <td>12</td>
+                        <td class="text-success fw-bold">11</td>
+                        <td class="text-danger fw-bold">1</td>
+                        <td><div class="progress" style="height: 8px;"><div class="progress-bar bg-success" style="width: 91.7%;"></div></div></td>
+                        <td class="pe-4"><span class="badge bg-success-subtle text-success">Safe</span></td>
+                      </tr>
+                      <tr>
+                        <td class="ps-4"><strong>CS603: Software Engineering & DevOps</strong></td>
+                        <td>Prof. Anurag Verma</td>
+                        <td>12</td>
+                        <td class="text-success fw-bold">11</td>
+                        <td class="text-danger fw-bold">1</td>
+                        <td><div class="progress" style="height: 8px;"><div class="progress-bar bg-success" style="width: 91.7%;"></div></div></td>
+                        <td class="pe-4"><span class="badge bg-success-subtle text-success">Safe</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+          setTimeout(initStudentCharts, 50);
+        } else if (tab === 'history') {
+          container.innerHTML = `
+            <div class="custom-card">
+              <div class="custom-card-header flex-wrap gap-2">
+                <h2 class="custom-card-title"><i class="bi bi-calendar-check-fill text-primary"></i> My Attendance History Logs</h2>
+                <button onclick="launchPortal('student', 'dashboard')" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                  <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </button>
+              </div>
+              <div class="custom-card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle custom-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Course</th>
+                        <th>Subject Title</th>
+                        <th>Status</th>
+                        <th>Faculty</th>
+                        <th>Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="font-monospace text-muted">2026-10-14</td>
+                        <td><span class="badge bg-light text-dark border font-monospace">CS601</span></td>
+                        <td>Cloud Computing & Virtualization</td>
+                        <td><span class="badge-status badge-present"><i class="bi bi-check-circle-fill"></i> Present</span></td>
+                        <td>Prof. Anurag Verma</td>
+                        <td>Regular Lecture</td>
+                      </tr>
+                      <tr>
+                        <td class="font-monospace text-muted">2026-10-13</td>
+                        <td><span class="badge bg-light text-dark border font-monospace">CS602</span></td>
+                        <td>Distributed Database Systems</td>
+                        <td><span class="badge-status badge-present"><i class="bi bi-check-circle-fill"></i> Present</span></td>
+                        <td>Dr. Neha Saxena</td>
+                        <td>Regular Lecture</td>
+                      </tr>
+                      <tr>
+                        <td class="font-monospace text-muted">2026-10-12</td>
+                        <td><span class="badge bg-light text-dark border font-monospace">CS603</span></td>
+                        <td>Software Engineering & DevOps</td>
+                        <td><span class="badge-status badge-present"><i class="bi bi-check-circle-fill"></i> Present</span></td>
+                        <td>Prof. Anurag Verma</td>
+                        <td>Regular Lecture</td>
+                      </tr>
+                      <tr>
+                        <td class="font-monospace text-muted">2026-10-10</td>
+                        <td><span class="badge bg-light text-dark border font-monospace">CS601</span></td>
+                        <td>Cloud Computing & Virtualization</td>
+                        <td><span class="badge-status badge-late"><i class="bi bi-clock-fill"></i> Late</span></td>
+                        <td>Prof. Anurag Verma</td>
+                        <td>Traffic delay</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Chart.js renderers
+    function initAdminCharts() {
+      const trendCanvas = document.getElementById('adminTrendChart');
+      const ratioCanvas = document.getElementById('adminRatioChart');
+      if (trendCanvas) {
+        new Chart(trendCanvas, {
+          type: 'line',
+          data: {
+            labels: ['Oct 07', 'Oct 08', 'Oct 09', 'Oct 10', 'Oct 11', 'Oct 13', 'Oct 14'],
+            datasets: [
+              { label: 'Present Students', data: [25, 27, 26, 28, 25, 27, 28], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.12)', fill: true, tension: 0.35, borderWidth: 2.5 },
+              { label: 'Absent Students', data: [5, 3, 4, 2, 5, 3, 2], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, tension: 0.35, borderWidth: 2 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+      if (ratioCanvas) {
+        new Chart(ratioCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Present', 'Absent', 'Late'],
+            datasets: [{ data: [330, 42, 24], backgroundColor: ['#10b981', '#ef4444', '#f59e0b'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+        });
+      }
+    }
+
+    function initStudentCharts() {
+      const gaugeCanvas = document.getElementById('studentOverallChart');
+      const barCanvas = document.getElementById('studentSubjectChart');
+      if (gaugeCanvas) {
+        new Chart(gaugeCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Present', 'Absent', 'Late'],
+            datasets: [{ data: [33, 3, 2], backgroundColor: ['#10b981', '#fca5a5', '#fcd34d'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '74%' }
+        });
+      }
+      if (barCanvas) {
+        new Chart(barCanvas, {
+          type: 'bar',
+          data: {
+            labels: ['CS601 (Cloud)', 'CS602 (DBMS)', 'CS603 (DevOps)'],
+            datasets: [{ label: 'Attendance %', data: [91.7, 91.7, 91.7], backgroundColor: ['#2563eb', '#2563eb', '#2563eb'], borderRadius: 6 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+        });
+      }
+    }
+
+    // Interactive helper actions
+    function setAttendanceStatus(studentId, status, btn) {
+      const student = appState.students.find(s => s.id === studentId);
+      if (student) student.status = status;
+      const group = btn.parentElement;
+      group.querySelectorAll('.att-option-btn').forEach(b => b.classList.remove('selected-p', 'selected-a', 'selected-l'));
+      if (status === 'Present') btn.classList.add('selected-p');
+      if (status === 'Absent') btn.classList.add('selected-a');
+      if (status === 'Late') btn.classList.add('selected-l');
+
+      const csStudents = appState.students.filter(s => s.dept === 'CS');
+      document.getElementById('countPresent').textContent = csStudents.filter(s => s.status === 'Present').length;
+      document.getElementById('countAbsent').textContent = csStudents.filter(s => s.status === 'Absent').length;
+      document.getElementById('countLate').textContent = csStudents.filter(s => s.status === 'Late').length;
+    }
+
+    function markAllPresent() {
+      const csStudents = appState.students.filter(s => s.dept === 'CS');
+      csStudents.forEach(s => s.status = 'Present');
+      renderPortalContent('faculty', 'mark');
+      showToast('All students marked Present.', 'success');
+    }
+
+    function checkDuplicateDemo() {
+      const box = document.getElementById('duplicateWarningBox');
+      if (box) box.classList.toggle('d-none');
+    }
+
+    function saveAttendanceDemo() {
+      saveState();
+      showToast('Attendance records saved successfully!', 'success');
+    }
+
+    function handleModalAddStudent(e) {
+      e.preventDefault();
+      const name = document.getElementById('add_name').value.trim();
+      const roll = document.getElementById('add_roll').value.trim().toUpperCase();
+      const email = document.getElementById('add_email').value.trim().toLowerCase();
+      const dept = document.getElementById('add_dept').value;
+      const class_name = document.getElementById('add_class').value;
+
+      appState.students.unshift({
+        id: Date.now(),
+        roll: roll,
+        name: name,
+        email: email,
+        dept: dept,
+        class_name: class_name,
+        sem: 6,
+        rate: 100.0,
+        attended: 0,
+        absent: 0,
+        late: 0,
+        status: 'Present'
+      });
+      saveState();
+      bootstrap.Modal.getInstance(document.getElementById('modalAddStudent')).hide();
+      renderPortalContent('admin', 'students');
+      showToast(`Student ${name} enrolled successfully!`, 'success');
+    }
+
+    function deleteStudent(id) {
+      if (confirm('Are you sure you want to delete this student record?')) {
+        appState.students = appState.students.filter(s => s.id !== id);
+        saveState();
+        renderPortalContent('admin', 'students');
+        showToast('Student deleted successfully.', 'info');
+      }
+    }
+
+    function downloadSampleCSV() {
+      let csv = 'Roll Number,Student Name,Department,Class,Attendance Rate\n';
+      appState.students.forEach(s => {
+        csv += `${s.roll},"${s.name}",${s.dept},"${s.class_name}",${s.rate}%\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `attendance_audit_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      showToast('Attendance report CSV downloaded.', 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const bg = type === 'success' ? 'bg-success' : (type === 'danger' ? 'bg-danger' : 'bg-primary');
+      const el = document.createElement('div');
+      el.className = `toast align-items-center text-white ${bg} border-0 mb-2`;
+      el.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-info-circle-fill me-2"></i>${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `;
+      container.appendChild(el);
+      new bootstrap.Toast(el, { delay: 3500 }).show();
+    }
+
+    function toggleSidebar() {
+      document.getElementById('appSidebar')?.classList.toggle('show');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} - Cloud Attendance System</title>
+  
+  <!-- Favicon / Collegiate Logo -->
+  <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/college_logo.jpg') }}">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Application Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <img src="{{ url_for('static', filename='images/college_logo.jpg') }}" alt="College Emblem" class="sidebar-brand-logo">
+        <div class="sidebar-brand-text">
+          Apex Institute
+          <small>Attendance Cloud</small>
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        {% if session.get('role') == 'admin' %}
+          <li class="sidebar-menu-header">Administrator</li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-nav-link {% if active_page == 'admin_dashboard' %}active{% endif %}">
+              <i class="bi bi-grid-1x2-fill"></i>
+              <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('admin.students') }}" class="sidebar-nav-link {% if active_page == 'admin_students' %}active{% endif %}">
+              <i class="bi bi-people-fill"></i>
+              <span>Manage Students</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('admin.faculty') }}" class="sidebar-nav-link {% if active_page == 'admin_faculty' %}active{% endif %}">
+              <i class="bi bi-person-badge-fill"></i>
+              <span>Manage Faculty</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('admin.academics') }}" class="sidebar-nav-link {% if active_page == 'admin_academics' %}active{% endif %}">
+              <i class="bi bi-mortarboard-fill"></i>
+              <span>Academics & Depts</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('admin.reports') }}" class="sidebar-nav-link {% if active_page == 'admin_reports' %}active{% endif %}">
+              <i class="bi bi-file-earmark-bar-graph-fill"></i>
+              <span>Attendance Reports</span>
+            </a>
+          </li>
+
+        {% elif session.get('role') == 'faculty' %}
+          <li class="sidebar-menu-header">Faculty Portal</li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('faculty.dashboard') }}" class="sidebar-nav-link {% if active_page == 'faculty_dashboard' %}active{% endif %}">
+              <i class="bi bi-house-door-fill"></i>
+              <span>Faculty Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('faculty.mark_attendance') }}" class="sidebar-nav-link {% if active_page == 'faculty_mark' %}active{% endif %}">
+              <i class="bi bi-check2-square"></i>
+              <span>Mark Attendance</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('faculty.view_attendance') }}" class="sidebar-nav-link {% if active_page == 'faculty_view' %}active{% endif %}">
+              <i class="bi bi-card-checklist"></i>
+              <span>Attendance Logs</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('faculty.reports') }}" class="sidebar-nav-link {% if active_page == 'faculty_reports' %}active{% endif %}">
+              <i class="bi bi-pie-chart-fill"></i>
+              <span>Summary Reports</span>
+            </a>
+          </li>
+
+        {% elif session.get('role') == 'student' %}
+          <li class="sidebar-menu-header">Student Portal</li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('student.dashboard') }}" class="sidebar-nav-link {% if active_page == 'student_dashboard' %}active{% endif %}">
+              <i class="bi bi-person-circle"></i>
+              <span>My Attendance</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="{{ url_for('student.history') }}" class="sidebar-nav-link {% if active_page == 'student_history' %}active{% endif %}">
+              <i class="bi bi-calendar-check-fill"></i>
+              <span>Attendance History</span>
+            </a>
+          </li>
+        {% endif %}
+
+        <li class="sidebar-menu-header">Cloud Platform</li>
+        <li class="sidebar-nav-item">
+          <a href="/health" target="_blank" class="sidebar-nav-link">
+            <i class="bi bi-hdd-network-fill"></i>
+            <span>System Health API</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- User Profile Box at bottom of sidebar -->
+      <div class="sidebar-user">
+        <div class="user-avatar-circle">
+          {{ session.get('name', 'U')[0] }}
+        </div>
+        <div class="user-info-text">
+          <div class="user-info-name" title="{{ session.get('name') }}">{{ session.get('name', 'User') }}</div>
+          <div class="user-info-role">{{ session.get('role', 'Role') }}</div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="text-white-50 hover-white ms-auto" title="Log Out">
+          <i class="bi bi-box-arrow-right fs-5"></i>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <div class="app-main">
+      <!-- Top Navigation Bar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggler-btn" id="sidebarToggler" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+          </button>
+          <h1 class="page-title">{% block header_title %}Student Attendance Management System{% endblock %}</h1>
+        </div>
+
+        <div class="topbar-right">
+          <div class="cloud-status-pill d-none d-sm-flex" title="Cloud Database Connection Active">
+            <span class="cloud-dot"></span>
+            <span>Cloud Sync Active</span>
+          </div>
+
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-fill text-primary me-1"></i>
+              <span class="fw-semibold">{{ session.get('username') }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+              <li class="dropdown-header">
+                <strong>{{ session.get('name') }}</strong><br>
+                <small class="text-muted">{{ session.get('email') }}</small>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                  <i class="bi bi-shield-lock me-2 text-primary"></i> Change Password
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                  <i class="bi bi-box-arrow-right me-2"></i> Log Out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content Area -->
+      <main class="page-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm mb-4" role="alert">
+                <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Body Block -->
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container for dynamic alerts -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1100;"></div>
+
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="{{ url_for('auth.change_password') }}" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="changePasswordLabel"><i class="bi bi-shield-lock text-primary me-2"></i>Change Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Current Password</label>
+              <input type="password" name="current_password" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">New Password</label>
+              <input type="password" name="new_password" class="form-control" minlength="6" required>
+              <div class="form-text">Must be at least 6 characters long.</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Confirm New Password</label>
+              <input type="password" name="confirm_password" class="form-control" minlength="6" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js CDN for interactive visual graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Application Global JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
